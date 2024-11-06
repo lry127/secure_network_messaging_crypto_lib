@@ -1,0 +1,2 @@
+# secure_network_messaging_crypto_lib
+crypto library for java project SecureNetowrkMessaging
