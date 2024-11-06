@@ -8,7 +8,7 @@ crypto library for java project SecureNetowrkMessaging
 
 2. copy the static library you built in step 1 to the `prebuilt` directory, modify the `CMakeLists.txt` as needed
 
-3. built the `crypto_lib` target, this is the jni library you need
+3. build the `crypto_lib` target, this is the jni library you need
 
 4. [*optional but highly recommended*]
    
