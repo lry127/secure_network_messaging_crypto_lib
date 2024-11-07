@@ -2,7 +2,37 @@
 
 crypto library for java project SecureNetowrkMessaging
 
-## Build instructions
+## Build with Docker
+
+1. clone the repo
+   
+   ```bash
+   git clone https://github.com/lry127/secure_network_messaging_crypto_lib.git
+   ```
+
+2. build docker image
+   
+   ```bash
+   docker build . -t secure_network_messaging_crypto_lib --network host
+   ```
+
+3. build the library
+   
+   - linux x86 target
+     
+     ```bash
+     docker run -v ./product:/product  secure_network_messaging_crypto_lib linux_x86_build.sh
+     ```
+   
+   - linux x86_64 target
+     
+     ```bash
+     docker run -v ./product:/product  secure_network_messaging_crypto_lib linux_x86_64_build.sh
+     ```
+
+4. library will be placed at `./product` directory
+
+## Build instructions (Manually)
 
 1. follow the installation guide on the official libsodium [website](https://doc.libsodium.org/installation), you may need the `-fPIC` flag when compiling. [if you are running ubuntu 24.04 on x86_64 platform, you *may* skip this step *for testing purpose*. (you can found the prebuilt static library at` prebuilt/x86_64` dir) But as a rule of thumb, always build cryptographic library *on your own*]
 

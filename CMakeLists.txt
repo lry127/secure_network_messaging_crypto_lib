@@ -1,11 +1,10 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.10)
 project(secure_network_messaging_crypto_lib)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
-include_directories(prebuilt/x86_64/include)
+include_directories(prebuilt/libsodium/include)
 
 find_package(JNI REQUIRED)
 include_directories(${JNI_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include)
@@ -15,7 +14,7 @@ add_library(crypto_lib STATIC
         src/LengthMessageCrypto.cpp)
 
 ADD_LIBRARY(sodium STATIC IMPORTED)
-SET_TARGET_PROPERTIES(sodium PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/prebuilt/x86_64/lib/libsodium.a)
+SET_TARGET_PROPERTIES(sodium PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/prebuilt/libsodium/lib/libsodium.a)
 TARGET_LINK_LIBRARIES(crypto_lib sodium)
 
 # jni binding
@@ -54,6 +53,4 @@ target_link_libraries(
 
 include(GoogleTest)
 gtest_discover_tests(crypto_lib_test)
-
-
 
