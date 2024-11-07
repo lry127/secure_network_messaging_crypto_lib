@@ -1,6 +1,4 @@
-mkdir /libsodium && cd /libsodium
-wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.20.tar.gz
-tar xf libsodium-1.0.20.tar.gz && cd libsodium-1.0.20
+cd /libsodium-1.0.20
 ./configure --host=i686-linux-gnu CFLAGS="-m32"  LDFLAGS="-m32" --prefix=$(pwd)/x86 --disable-pie
 make -j4
 make install
