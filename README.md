@@ -4,6 +4,10 @@ crypto library for java project SecureNetowrkMessaging
 
 ## Build with Docker
 
+> [!TIP]
+> 
+> Rebuild the docker image each time you change the source code.
+
 1. clone the repo
    
    ```bash
