@@ -15,7 +15,7 @@ class LengthMessageCrypto {
 public:
     explicit LengthMessageCrypto(unsigned char *part1, unsigned char *key);
 
-    explicit LengthMessageCrypto(unsigned char *key);
+    explicit LengthMessageCrypto(unsigned char *key, int32_t messageId);
 
     using CryptoResult = struct {
         int32_t length;
@@ -24,6 +24,10 @@ public:
 
     int32_t getBodySize() const {
         return encryptedBodySize;
+    }
+
+    int32_t getMessageId() const {
+        return messageId;
     }
 
     CryptoResult decryptBody(unsigned char *bodyCiphertext);
@@ -43,8 +47,8 @@ public:
         return crypto;
     }
 
-    static LengthMessageCrypto *create(unsigned char *key) {
-        auto crypto = new LengthMessageCrypto(key);
+    static LengthMessageCrypto *create(unsigned char *key, int32_t messageId) {
+        auto crypto = new LengthMessageCrypto(key, messageId);
         addInstance();
         return crypto;
     }
@@ -68,6 +72,7 @@ private:
     int32_t decryptHeader(unsigned char *header);
 
     int32_t encryptedBodySize{-1};
+    int32_t messageId {-1};
     unsigned char nonceBase[crypto_secretbox_NONCEBYTES];
     unsigned char symmetricKey[crypto_secretbox_KEYBYTES];
 

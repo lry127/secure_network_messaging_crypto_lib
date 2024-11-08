@@ -23,7 +23,7 @@ LengthMessageCrypto::CryptoResult LengthMessageCrypto::decryptBody(unsigned char
 }
 
 LengthMessageCrypto::CryptoResult LengthMessageCrypto::encryptToFullMessage(unsigned char *body, int32_t size) {
-    int32_t length = size + crypto_secretbox_NONCEBYTES + crypto_secretbox_MACBYTES * 2 + sizeof(int32_t);
+    int32_t length = size + crypto_secretbox_NONCEBYTES + crypto_secretbox_MACBYTES * 2 + sizeof(int32_t) * 2;
     CryptoResult result{length, std::make_unique<unsigned char[]>(length)};
     unsigned char *nonceBegin = result.data.get();
 
@@ -31,10 +31,13 @@ LengthMessageCrypto::CryptoResult LengthMessageCrypto::encryptToFullMessage(unsi
     randombytes_buf(nonceBegin, crypto_secretbox_NONCEBYTES);
 
     // prepare the header
-    unsigned char header[sizeof(int32_t)];
+    unsigned char header[sizeof(int32_t) * 2];
     int32_t encryptedBodySize = size + crypto_secretbox_MACBYTES;
     for (int i = 0; i < sizeof(int32_t); i++) {
         header[i] = encryptedBodySize >> 8 * (3 - i) & 0xFF;
+    }
+    for (int i = 0; i < sizeof(int32_t); i++) {
+        header[i + sizeof(int32_t)] = messageId >> 8 * (3 - i) & 0xFF;
     }
 
     auto *const headerBegin = nonceBegin + crypto_secretbox_NONCEBYTES;
@@ -62,23 +65,29 @@ LengthMessageCrypto(unsigned char *part1, unsigned char *key) {
     memcpy(symmetricKey, key, sizeof(symmetricKey));
 }
 
-LengthMessageCrypto::LengthMessageCrypto(unsigned char *key) {
+LengthMessageCrypto::LengthMessageCrypto(unsigned char *key, int32_t messageId) : messageId{messageId} {
     memcpy(symmetricKey, key, sizeof(symmetricKey));
 }
 
 int32_t LengthMessageCrypto::decryptHeader(unsigned char *header) {
-    unsigned char decryptedHeader[sizeof(int32_t)];
+    unsigned char decryptedHeader[sizeof(int32_t) * 2];
     bool decryptionResultCode =
-            crypto_secretbox_open_easy(decryptedHeader, header, sizeof(int32_t) + crypto_secretbox_MACBYTES, nonceBase,
+            crypto_secretbox_open_easy(decryptedHeader, header, sizeof(int32_t) * 2 + crypto_secretbox_MACBYTES,
+                                       nonceBase,
                                        symmetricKey) == 0;
     if (!decryptionResultCode) {
         return -2;
     }
 
-    int32_t result = 0;
+    int32_t sizeStore = 0;
+    int32_t messageIdStore = 0;
     for (int i = 0; i < sizeof(int32_t); i++) {
-        result = result << 8 | decryptedHeader[i];
+        sizeStore = sizeStore << 8 | decryptedHeader[i];
     }
-    encryptedBodySize = result;
-    return result;
+    for (int i = 0; i < sizeof(int32_t); i++) {
+        messageIdStore = messageIdStore << 8 | decryptedHeader[i + sizeof(int32_t)];
+    }
+    encryptedBodySize = sizeStore;
+    messageId = messageIdStore;
+    return sizeStore;
 }

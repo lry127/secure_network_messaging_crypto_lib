@@ -103,10 +103,10 @@ jlong createNewLengthMessageNativeForDecryption(JNIEnv *env, jobject obj, jbyteA
     return 0;
 }
 
-jlong createNewLengthMessageNativeForEncryption(JNIEnv *env, jobject obj, jbyteArray transmitKey) {
+jlong createNewLengthMessageNativeForEncryption(JNIEnv *env, jobject obj, jbyteArray transmitKey, jint messageId) {
     jbyte *keyBytes = env->GetByteArrayElements(transmitKey, nullptr);
 
-    LengthMessageCrypto *lengthMessage = LengthMessageCrypto::create(reinterpret_cast<unsigned char *>(keyBytes));
+    LengthMessageCrypto *lengthMessage = LengthMessageCrypto::create(reinterpret_cast<unsigned char *>(keyBytes), messageId);
     env->ReleaseByteArrayElements(transmitKey, keyBytes, JNI_ABORT);
 
     if (lengthMessage) {
@@ -159,12 +159,20 @@ jbyteArray decryptNative(JNIEnv *env, jobject obj, jbyteArray encrypted) {
     return decryptedArray;
 }
 
-jlong getEncryptedBodySize(JNIEnv *env, jobject obj) {
+jint getEncryptedBodySize(JNIEnv *env, jobject obj) {
     LengthMessageCrypto *lengthMessage = getLengthMessage(env, obj);
     if (!lengthMessage) {
         return -1;
     }
     return lengthMessage->getBodySize();
+}
+
+jlong getMessageId(JNIEnv *env, jobject obj) {
+    LengthMessageCrypto *lengthMessage = getLengthMessage(env, obj);
+    if (!lengthMessage) {
+        return -1;
+    }
+    return lengthMessage->getMessageId();
 }
 
 jint getLengthMessageTotalInstanceCount(JNIEnv *env, jclass clazz) {
@@ -198,7 +206,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
             reinterpret_cast<void *>(createNewLengthMessageNativeForDecryption)
         },
         {
-            "createNewLengthMessageNativeForEncryption", "([B)J",
+            "createNewLengthMessageNativeForEncryption", "([BI)J",
             reinterpret_cast<void *>(createNewLengthMessageNativeForEncryption)
         },
         {"cleanLengthMessageNative", "(J)V", reinterpret_cast<void *>(cleanLengthMessageNative)},
@@ -224,6 +232,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
         {"encryptNative", "(JJ)[B", reinterpret_cast<void *>(encryptNative)},
         {"decryptNative", "([B)[B", reinterpret_cast<void *>(decryptNative)},
         {"getEncryptedBodySize", "()I", reinterpret_cast<void *>(getEncryptedBodySize)},
+        {"getMessageId", "()I", reinterpret_cast<void *>(getMessageId)},
         {"getTotalInstanceCount", "()I", reinterpret_cast<void *>(getLengthMessageTotalInstanceCount)},
     };
     if (env->RegisterNatives(lengthMessageCryptoClass, lengthMessageCryptoMethods,
