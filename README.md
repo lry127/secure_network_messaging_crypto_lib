@@ -36,7 +36,7 @@ crypto library for java project SecureNetowrkMessaging
 
 4. library will be placed at `./product` directory
 
-## Build instructions (Manually)
+## Build Manually
 
 1. follow the installation guide on the official libsodium [website](https://doc.libsodium.org/installation), you may need the `-fPIC` and `--disable-pie` flag when compiling.
 
