@@ -223,7 +223,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     static JNINativeMethod lengthMessageCryptoMethods[] = {
         {"encryptNative", "(JJ)[B", reinterpret_cast<void *>(encryptNative)},
         {"decryptNative", "([B)[B", reinterpret_cast<void *>(decryptNative)},
-        {"getEncryptedBodySize", "()J", reinterpret_cast<void *>(getEncryptedBodySize)},
+        {"getEncryptedBodySize", "()I", reinterpret_cast<void *>(getEncryptedBodySize)},
         {"getTotalInstanceCount", "()I", reinterpret_cast<void *>(getLengthMessageTotalInstanceCount)},
     };
     if (env->RegisterNatives(lengthMessageCryptoClass, lengthMessageCryptoMethods,

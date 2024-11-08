@@ -18,20 +18,20 @@ public:
     explicit LengthMessageCrypto(unsigned char *key);
 
     using CryptoResult = struct {
-        int64_t length;
+        int32_t length;
         std::unique_ptr<unsigned char[]> data;
     };
 
-    int64_t getBodySize() const {
+    int32_t getBodySize() const {
         return encryptedBodySize;
     }
 
     CryptoResult decryptBody(unsigned char *bodyCiphertext);
 
-    CryptoResult encryptToFullMessage(unsigned char *body, int64_t size);
+    CryptoResult encryptToFullMessage(unsigned char *body, int32_t size);
 
-    static LengthMessageCrypto *create(unsigned char *part1Message, uint64_t part1Size, unsigned char *key) {
-        if (part1Size < crypto_secretbox_NONCEBYTES + crypto_secretbox_MACBYTES + sizeof(uint64_t)) {
+    static LengthMessageCrypto *create(unsigned char *part1Message, int32_t part1Size, unsigned char *key) {
+        if (part1Size < crypto_secretbox_NONCEBYTES + crypto_secretbox_MACBYTES + sizeof(int32_t)) {
             return nullptr;
         }
         auto crypto = new LengthMessageCrypto(part1Message, key);
@@ -65,9 +65,9 @@ public:
     }
 
 private:
-    int64_t decryptHeader(unsigned char *header);
+    int32_t decryptHeader(unsigned char *header);
 
-    int64_t encryptedBodySize{-1};
+    int32_t encryptedBodySize{-1};
     unsigned char nonceBase[crypto_secretbox_NONCEBYTES];
     unsigned char symmetricKey[crypto_secretbox_KEYBYTES];
 

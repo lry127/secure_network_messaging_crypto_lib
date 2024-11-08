@@ -11,7 +11,7 @@ LengthMessageCrypto::CryptoResult LengthMessageCrypto::decryptBody(unsigned char
     for (int i = 0; i < crypto_secretbox_NONCEBYTES; ++i) {
         *(nonceBase + i) = ~*(nonceBase + i);
     }
-    int64_t decryptedBodySize = encryptedBodySize - crypto_secretbox_MACBYTES;
+    int32_t decryptedBodySize = encryptedBodySize - crypto_secretbox_MACBYTES;
 
     CryptoResult result{decryptedBodySize, std::make_unique<unsigned char[]>(decryptedBodySize)};
     if (crypto_secretbox_open_easy(result.data.get(), bodyCiphertext, encryptedBodySize, nonceBase, symmetricKey) !=
@@ -22,8 +22,8 @@ LengthMessageCrypto::CryptoResult LengthMessageCrypto::decryptBody(unsigned char
     return result;
 }
 
-LengthMessageCrypto::CryptoResult LengthMessageCrypto::encryptToFullMessage(unsigned char *body, int64_t size) {
-    int64_t length = size + crypto_secretbox_NONCEBYTES + crypto_secretbox_MACBYTES * 2 + sizeof(int64_t);
+LengthMessageCrypto::CryptoResult LengthMessageCrypto::encryptToFullMessage(unsigned char *body, int32_t size) {
+    int32_t length = size + crypto_secretbox_NONCEBYTES + crypto_secretbox_MACBYTES * 2 + sizeof(int32_t);
     CryptoResult result{length, std::make_unique<unsigned char[]>(length)};
     unsigned char *nonceBegin = result.data.get();
 
@@ -31,10 +31,10 @@ LengthMessageCrypto::CryptoResult LengthMessageCrypto::encryptToFullMessage(unsi
     randombytes_buf(nonceBegin, crypto_secretbox_NONCEBYTES);
 
     // prepare the header
-    unsigned char header[sizeof(int64_t)];
-    int64_t encryptedBodySize = size + crypto_secretbox_MACBYTES;
-    for (size_t i = 0; i < 8; ++i) {
-        header[i] = encryptedBodySize >> 8 * (7 - i) & 0xFF;
+    unsigned char header[sizeof(int32_t)];
+    int32_t encryptedBodySize = size + crypto_secretbox_MACBYTES;
+    for (int i = 0; i < sizeof(int32_t); i++) {
+        header[i] = encryptedBodySize >> 8 * (3 - i) & 0xFF;
     }
 
     auto *const headerBegin = nonceBegin + crypto_secretbox_NONCEBYTES;
@@ -66,17 +66,17 @@ LengthMessageCrypto::LengthMessageCrypto(unsigned char *key) {
     memcpy(symmetricKey, key, sizeof(symmetricKey));
 }
 
-int64_t LengthMessageCrypto::decryptHeader(unsigned char *header) {
-    unsigned char decryptedHeader[sizeof(int64_t)];
+int32_t LengthMessageCrypto::decryptHeader(unsigned char *header) {
+    unsigned char decryptedHeader[sizeof(int32_t)];
     bool decryptionResultCode =
-            crypto_secretbox_open_easy(decryptedHeader, header, sizeof(int64_t) + crypto_secretbox_MACBYTES, nonceBase,
+            crypto_secretbox_open_easy(decryptedHeader, header, sizeof(int32_t) + crypto_secretbox_MACBYTES, nonceBase,
                                        symmetricKey) == 0;
     if (!decryptionResultCode) {
         return -2;
     }
 
-    int64_t result = 0;
-    for (size_t i = 0; i < sizeof(int64_t); ++i) {
+    int32_t result = 0;
+    for (int i = 0; i < sizeof(int32_t); i++) {
         result = result << 8 | decryptedHeader[i];
     }
     encryptedBodySize = result;
