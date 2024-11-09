@@ -6,6 +6,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(prebuilt/libsodium/include)
 
+if(APPLE)
+    set(JAVA_INCLUDE_PATH "$ENV{JAVA_HOME}/include")
+    set(JAVA_AWT_INCLUDE_PATH "$ENV{JAVA_HOME}/include")
+    set(JAVA_INCLUDE_PATH2 "$ENV{JAVA_HOME}/include/darwin")
+    set(JAVA_AWT_LIBRARY "$ENV{JAVA_HOME}/lib/libjawt.dylib")
+    set(JAVA_JVM_LIBRARY "$ENV{JAVA_HOME}/lib/server/libjvm.dylib")
+endif ()
+
 find_package(JNI REQUIRED)
 include_directories(${JNI_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include)
 
